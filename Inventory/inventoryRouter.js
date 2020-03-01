@@ -66,6 +66,36 @@ router.delete("/:id", async (req, res, next) => {
    }
 });
 
+router.post("/:id/sales", async (req, res, next) => {
+   try {
+       const  [id]  = req.params.id;
+       const vin_id = await db("cars").where({ id });
+       const sale  = {
+           ...req.body,
+           vin_sale: vin_id[0].vin
+       };
+       console.log(vin_id);
+       console.log(sale);
+     const newSale = await db("sales").insert(sale);
+     res.status(201).json(newSale)
+   } catch (e) {
+       next(e)
+   }
+});
+
+router.get("/:id/sales", async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const car = await db("cars").where({ id }).first();
+        const vin = await db("cars").where({ id }).select("vin");
+        const sales = await db("sales").where({vin_sale: vin[0].vin});
+        console.log(car);
+        res.status(200).json([car, sales[0]]);
+    } catch (e) {
+        next(e)
+    }
+});
+
 
 
 module.exports = router;
